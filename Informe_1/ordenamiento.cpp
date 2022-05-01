@@ -1,35 +1,24 @@
 #include<iostream>
+#include<algorithm>
+#include <chrono>
+#include <unistd.h>
+#include <vector>       // std::vector
+
 using namespace std;
-
-
-
-//Utilizamos el selectionSort visto en clases
-void selectionSort(int n, long* v){
-	for(int i = 0; i<n; i++){
-		for(int j = i+1;j<n;j++){
-			if(v[i]>v[j]){
-				//si esto ocurre hacer swap entre v[i] y v[j]
-				int aux = v[i];
-				v[i] = v[j];
-				v[j] = aux;
-			}
-		}
-	}
-}
-
 
 
 //Funciones Utiles para recibir arreglos por la terminal
 
-void imprimir_arreglo(long *arr, int size){
+
+void imprimir_arreglo(long long int *arr, int size){
 	for(int i = 0; i<size; i++){
 		cout<<arr[i]<<" ";
 	}
 	cout<<endl;
 }
 
-long *pedir_arreglo(int size){
-	long *arr = new long[size];
+long long int *pedir_arreglo(int size){
+	long long int *arr = new long long int[size];
 	cout<<"Ingrese los elementos del arreglo"<<endl;
 	for(int i = 0; i<size; i++){
 		cin>>arr[i];
@@ -39,6 +28,57 @@ long *pedir_arreglo(int size){
 	delete[] arr;
 
 }
+
+
+//Funciones Utiles para recibir arreglos por la terminal
+void swap(long *r, long *s){
+	long aux = *r;
+	*r = *s;
+	*s = aux;
+}
+
+
+//Utilizamos el algoritmo insertionsort mencinoado en el libro guia del curso
+void insertionsort(long long int *A, int n){
+    int key;
+    for (int j = 1; j < n; j++){
+        key = A[j];   //Asignamos como clave al elemento en la posición
+ 		int  i = j - 1;
+        while (i >= 0 && A[i] > key){
+            A[i + 1] = A[i];
+            i = i - 1;
+        }
+        A[i + 1] = key;
+
+    }
+
+}
+
+////// QUICK SORT/ ///////
+//Para qucicksort primero debemos definir nuestra funcion partition, que divide el arreglo en dos y devuelve la posicion q descrita en el pseudocódgio
+
+int partition(long long int *A, int p, int r){
+	int x = A[r];
+	int i = p-1;
+	for(int j = p; j<r; j++){
+		if(A[j]<=x){
+			i++;
+			swap(A[i],A[j]);
+		}
+	}
+	swap(A[i+1],A[r]);
+	return i+1;
+}
+
+
+void quicksort(long long int *A, int p, int r){
+	if(p<r){
+		int q = partition(A,p,r);
+		quicksort(A,p,q-1);
+		quicksort(A,q+1,r);
+	}
+}
+
 
 ///////////////////////////////////////////////////////
 
@@ -60,7 +100,7 @@ long *pedir_arreglo(int size){
 // y cada uno de  (r-l+1) elementos (mas precisamente, el arreglo vL tendra (r-l)/2 +1 elementos, 
 //y el arreglo de la derecha los restantes)
 
-void mezclar_en_orden(long *v, int l, int r)
+void mezclar_en_orden(long long int *v, int l, int r)
 {
     int i, j, k; //Definimos i como un contador de elementos mezclados en el subarreglo de la izquierda
     //j la cantidad de elementos mezclados del subarreglo de la derecha de m
@@ -127,7 +167,7 @@ void mezclar_en_orden(long *v, int l, int r)
 //Utilizando la funcion mezclar_en_orden ya descrita, podemos proceder a definir el procedimiento MergeSort recursivo ya visto en clases
 
 //recibimos como entrada un arreglo v de n elementos
-void MergeSort(long* v, int l, int r){
+void MergeSort(long long int* v, int l, int r){
 	
 	//mientras tengamos sub arreglos 
 	if(l<r){
@@ -141,6 +181,7 @@ void MergeSort(long* v, int l, int r){
 		mezclar_en_orden(v, l, r);
 	}
 
+
 }
 
 
@@ -150,16 +191,34 @@ int main(){
 	int size;
 	cout<<" Ingrese el tamano del arreglo"<<endl;
 	cin>>size;
-	long *arr = pedir_arreglo(size);
-	//imprimir_arreglo(arr, size);
+	long long int*A = pedir_arreglo(size);
+	//cout<<"El arreglo sin ordenar es:"<<endl;
+	//imprimir_arreglo(A, size);
+
+	//cout<<endl;
+
+	//cout<<"El arreglo ordenado es:"<<endl;
+	
+	//Todas nuestras funciones de ordenamieto son 
+	
+	auto start = chrono::steady_clock::now();
+	// insertionsort(A,size);
+	// MergeSort(A, 0, size-1);
+	quicksort(A,0, size-1);
+	// std::sort(A, A+size);
+	// std::stable_sort(A, A+size);
+	auto end = chrono::steady_clock::now();
+	
 	cout<<endl;
+    cout << "Tiempo de ejecucion del algoritmo en microseconds: "
+        << chrono::duration_cast<chrono::microseconds>(end - start).count()
+        << " microseconds" << endl;
 
-	cout<<"El arreglo ordenado es:";
-	MergeSort(arr, 0, size-1);
+    cout<<endl;
 
-	imprimir_arreglo(arr, size);
-
+	//imprimir_arreglo(A, size);
 
 
+	delete[] A;
 	return 0;
 }

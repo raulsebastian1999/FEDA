@@ -21,6 +21,16 @@ double **crear_matriz(int m, int n){
 	
 }
 
+//Sobrecargamos esta funcion
+double **crear_matriz(int n){
+	double **mat = new double *[n];  
+	for(int i = 0; i<n; i++){
+		mat[i] = new double[n];
+	}
+	return mat; 
+	
+}
+
 //Esta funcion despliega en la pantalla los elementos  de una matriz matt de "filas" filas y "columnas" columnas
 void imprimir_matriz(double **mat, int filas, int columnas){
 	for(int i = 0; i<filas; i++){
@@ -83,7 +93,11 @@ double **pr_mat_optimizado(double **A, int mA, int nA, double **B, int mB, int n
 
 	for(int i = 0; i<mC; i++){  //Para realizar al producto calculamos C_ij como la fila i de la matriz A producto punto con la columna j de la matriz B (que en este caso, como la matriz viene transpuesta, coincide con la fila j)
 		for(int j = 0; j<nC;j++){
-			C[i][j] = produco_escalar(A[i],B[j],nA);
+			//C[i][j] = produco_escalar(A[i],B[j],nA); //si usamos la funcion producto escalar
+			C[i][j] = 0;
+			for(int k = 0; k<nA; k++){
+				C[i][j] = C[i][j] + A[i][k]*B[j][k];
+			}
 		}
 	}
 
@@ -92,7 +106,7 @@ double **pr_mat_optimizado(double **A, int mA, int nA, double **B, int mB, int n
 }
 
 ///// FUNCIONES PARA STRASSEN 
-
+//solo las haremos para funciones cuadradas, pues probaremos strassen en potencias cua
 double **sumar_matrices(double **A, double **B, int m, int n){
 	double **SUM = crear_matriz(m, n);
 	for(int i = 0; i<m;i++){
@@ -118,6 +132,9 @@ double **prod_matriz_por_escalar(double **A, double lambda, int m, int n){
 
 //Esta funcion entrega la matriz AB calculada segun el algoritmo de Strassen
 double **STRASSEN(double **A, int mA, int nA, double **B, int mB, int nB){
+
+
+
 	//fondo de la recursividad: 
 	int mC = mA;
 	int nC = nB;
@@ -359,49 +376,51 @@ int main(){
 	auto start1 = chrono::steady_clock::now();
 	
 	double **C_usual = producto_matrices(A, mA, nA, B, mB, nB); //Para el producto usual (cubico no optimizado)
-	delete[] C_usual;
+
 	auto end1 = chrono::steady_clock::now();
+	
 	cout<<endl;
-    cout << "Tiempo de ejecucion del cubico clasico en ns: "
-        << chrono::duration_cast<chrono::nanoseconds>(end1 - start1).count()
-        << " ns" << endl;
+    cout << "Tiempo de ejecucion del cubico clasico en ms: "
+        << chrono::duration_cast<chrono::microseconds>(end1 - start1).count()
+        << " ms" << endl;
 
     cout<<endl;
-	
 
-	//imprimir_matriz(C_usual, mC, nC);
+
+	//imprimir_matriz(C_usual, nC, mC);
+	delete[] C_usual;
 
 	cout<<endl;
 	//cout<<"La matriz AB calculada segun el algoritmo cubico modificado es:"<<endl;
 
 	auto start2 = chrono::steady_clock::now();
 	double **C_mod = pr_mat_optimizado(A, mA, nA, B_trans, mB, nB); //Para el producto que aprovecha la localidad de los datos
-	delete[] C_mod;
-
+	
 	auto end2 = chrono::steady_clock::now();
+	
 	cout<<endl;
-	cout << "Tiempo de ejecucion del cubico optimizado en ns: "
-        << chrono::duration_cast<chrono::nanoseconds>(end2 - start2).count()
-        << " ns" << endl;
+	cout << "Tiempo de ejecucion del cubico optimizado en ms: "
+        << chrono::duration_cast<chrono::microseconds>(end2 - start2).count()
+        << " ms" << endl;
 
     cout<<endl;
 	//imprimir_matriz(C_mod, mC, nC);
-
+    delete[] C_mod;
 	cout<<endl;
 	
 	//cout<<"La matriz AB calculada segun el algoritmo de Strassen es:"<<endl;
-	auto start3 = chrono::steady_clock::now();
+	/*auto start3 = chrono::steady_clock::now();
 
-	double **C_strassen_2 = STRASSEN(A, mA, nA,B,mB, nB);
-	delete[] C_strassen_2;
-
+	double **C_strassen_2 = STRASSEN(A,mA,nA,B,mB,nB);
+	
 	auto end3 = chrono::steady_clock::now();
 	cout<<endl;
-	cout << "Tiempo de ejecucion de Strassen en ns: "
-    << chrono::duration_cast<chrono::nanoseconds>(end3 - start3).count()
-	<< " ns" << endl;
+	cout << "Tiempo de ejecucion de Strassen en s: "
+    << chrono::duration_cast<chrono::microseconds>(end3 - start3).count()
+	<< " ms" << endl;
 	//imprimir_matriz(C_strassen_2, mC, nC);
-
+	delete[] C_strassen_2;
+	*/
 	delete[] A;
 	delete[] B;
 	delete[] B_trans;

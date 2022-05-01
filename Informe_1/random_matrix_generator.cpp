@@ -10,7 +10,6 @@ double **crear_matriz(int m, int n){
 		mat[i] = new double[n];
 	}
 	return mat; 
-	delete[] mat; //borramos la memoria solicitada, una vez ya se entrega en la salida
 }
 
 
@@ -24,33 +23,41 @@ int main(){
    //mt19937 rng; 
    //Initialize with non-deterministic seeds
    //rng.seed(std::random_device{}()); 
-   int m, n;
-   m =  512;
-   n = 512;
-
-
-   double** A = crear_matriz(m,n);
-   double** B = crear_matriz(m,n);
+   int mA, nA,mB,nB;
+   mA =  10;
+   nA= 20;
+   mB = 20;
+   nB = 10;
+   double** A = crear_matriz(mA,nA);
+   double** B = crear_matriz(mB,nB);
  	
-   for(int i = 0; i<m; i++){
-   	for(int j = 0; j<n; j++){
-   		A[i][j]=static_cast<double>(distrib(gen));  
-   		B[i][j]= static_cast<double>(distrib(gen));  
+   for(int i = 0; i<mA; i++){
+   	for(int j = 0; j<nA; j++){
+   		A[i][j]=static_cast<double>(distrib(gen));    
    	}
    }
   	
-   cout<<m<<" "<<n<<" "<<endl;
+   for(int i = 0; i<mB; i++){
+      for(int j = 0; j<nB; j++){
+         B[i][j]= static_cast<double>(distrib(gen));
+   
+      }
+   }
+   
+   
 
-   for(int i = 0; i<m; i++){
-   	for(int j = 0; j<n; j++){
+   cout<<mA<<" "<<nA<<" "<<endl;
+
+   for(int i = 0; i<mA; i++){
+   	for(int j = 0; j<nA; j++){
    		cout<<A[i][j]<<" ";
    	}cout<<endl;
    }
   	
   cout<<endl;
-   cout<<m<<" "<<n<<" "<<endl;
-   for(int i = 0; i<m; i++){
-   	for(int j = 0; j<n; j++){
+   cout<<mB<<" "<<nB<<" "<<endl;
+   for(int i = 0; i<mB; i++){
+   	for(int j = 0; j<nB; j++){
    		cout<<B[i][j]<<" ";
    	}cout<<endl;
    }
