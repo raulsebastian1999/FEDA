@@ -12,9 +12,9 @@ using namespace std;
 
 
 
-vector<string> splitStrings(string str, char dl){
+vector<string> splitStrings(string str, char dl){ //Función para vectorizar string según delimitador dl (obtenida de https://acervolima.com/divida-a-string-em-substrings-usando-delimitador/)
 
-    string word = "";
+    string word = ""; 
  
     // to count the number of split strings
     int num = 0;
@@ -52,62 +52,37 @@ vector<string> splitStrings(string str, char dl){
     return substr_list;
 }
 
-// bool findvector(vector<string>, vector<>)
 
 
-
-struct datarow{
-	string tweetID;
-	string tweetDate;
-	string tweetText;
-	string userID;
-	datarow(){} //constructor por defecto
-	datarow(vector<string> linestring){ //constructor a partir de vector de strings
-		tweetID = linestring[0];
-		tweetDate = linestring[1];
-		tweetText = linestring[2];
-		tweetID = linestring[3];
-	}
-	// ~datarow();
-	void print(){
-		cout<<tweetID<<" "<< tweetDate<<" "<<tweetText<<" "<<userID<<endl;
-	}
-
-};
 
 
 
 //(dato string, int tipo)
-struct node{
-	string data;
+//La clase nodo
+struct node{ 
+	string data; //posee dos atributos, dato y tipo
 	int type;
-
+	//El constructor por defecto, generara el dato " " y tipo -1 (no lo usaremos acá)
 	node(){
 		data = " ";
 		type = -1;
 	}
+	//El constructor dado un string s y entero tipo, asigna el tipo como type y el s como data
 	node(string s, int tipo){
 		data = s;
 		type = tipo;
 	}
-
-	string get_data(){
-		return data;
-	}
-	int get_type(){
-		return type;
-	}
-
-	// int get_index(){
-	// 	return index;
-	// }
+	
+	//Mas adelante vamos a necesitar hashear nodos, pues los queremos guardar en un unordered_set
+	//PAra ello debemos definir una funcion de comparacion
+	//En este caso dos nodos son iguales si tienen el mismo tipo y dato
 
 	bool operator==(const node & othernode) const
 	{
     	if (this->data == othernode.data && this->type == othernode.type) return true;
    	 	else return false;
   	}
-
+	//Ademas definimos una funcion hash, que se define a partir de la funcion de la STL pero ahora hashea nodos
   	struct HashFunction
   	{
     	size_t operator()(const node & nodo) const
@@ -152,24 +127,25 @@ class nodelist{
 	//Conjuntos de los nodos ya ingresados
 
 public:
-	vector<vector<node>> lista;
-	vector<node> V; //Vector de los nodos
+	vector<vector<node>> lista;  //lista es la lista de adyacencia
+	vector<node> V; //Vector de los nodos 
 
-	int size = 0;
-	int num_edges = 0;
-	int nodos_tipo0 = 0;
-	int nodos_tipo1 = 0;
+	int size = 0; //Cantidad de vertices
+	int num_edges = 0; //Cantidad de aristas
+	int nodos_tipo0 = 0; //Nodos tipo 0
+	int nodos_tipo1 = 0; //Analog
 	int nodos_tipo2 = 0;
 	int nodos_tipo3 = 0;
-	
-	void addnode(node nodo){
-		//No hay que verificar que esté repetida, entonces lo añadimos
-			vector<node> aux;
-			aux.push_back(nodo);
-			lista.push_back(aux);
-			V.push_back(nodo);
-			size++;
-			if(nodo.type == 0){
+		
+	//Funcion para añadir nodo
+	void addnode(node nodo){  //O(1)
+		//No hay que verificar que esté repetida (pues se hace en el .cpp), entonces lo añadimos
+			vector<node> aux;  //creamos vector auxiliar de nodos
+			aux.push_back(nodo); //le pusheamos el nodo a insertar
+			lista.push_back(aux); //y este vector que solo tiene al nodo nodo
+			V.push_back(nodo); //lo pusheamos al V y la lista
+			size++; //incrementamosla cant de vertices
+			if(nodo.type == 0){ //Si son de cierto tipo incrementamos los contadores
 				nodos_tipo0++;
 			}
 			if(nodo.type == 1){
@@ -182,22 +158,22 @@ public:
 				nodos_tipo3++;
 			}
 	}
-	//IMagineasreas que tenemos nodo.index
-	//Así, nodo1.index = i
+	//Método para añadir aristas
 	void addedge(node nodo1, node nodo2){ //O(n)
-		for(int i = 0; i<V.size(); i++){
+		for(int i = 0; i<V.size(); i++){ //Buscamos el vertice que coincida con nodo 1
 			if(V[i].data == nodo1.data && V[i].type == nodo1.type){
 				//El indice de nodo1 es i. 
-				lista[i].push_back(nodo2);
+				lista[i].push_back(nodo2); //Y en esa posicion, pusheamos el nodo 2
 			}
+			//Analogo para nodo 1
 			else if(V[i].data == nodo2.data && V[i].type == nodo2.type){
 				lista[i].push_back(nodo1);
 			}
-			num_edges++;
+			num_edges++; //Esto también podría estar dentro del if o elseif
 		}
 
 	}
-
+	//Funcion para imprimir grafo, solo para debugeaer
 	void print(){
 		for(int i = 0; i<size; i++){
 			// lista[i][0].index = i;
@@ -211,10 +187,10 @@ public:
 			cout<<"\n"<<std::flush;
 		}
 	}
-
+	//Entrega la fecha en la que se publicaron más tweets
 	void fecha_con_mas_publicaciones(){ //O(n)
-		string fecha_de_mas_tweets = "";
-		int mayor_dia = 0;
+		string fecha_de_mas_tweets = ""; //Inicializamos string vacio
+		int mayor_dia = 0; //y buscamos el maximo de manera usual
 		int index = 0;
 		for(int i = 0; i<size; ++i){
 			if(lista[i][0].type==1 && lista[i].size()>mayor_dia){
@@ -229,11 +205,11 @@ public:
 	}
 
 
-
+	//Esta función es análoga a la anterior
 	void usuario_con_mas_publicaciones(){
 		string twittero = "";
-		int mayor = 0;
-		int indice = 0;
+		int mayor = 0; //Mayor es el valor de las publicaciones del twittero actual mas twittero (que publicamas)
+		int indice = 0; //indice es el indice de ese twittero
 		int cant_publicaciones = 0;
 		for(int i = 0; i<size; ++i){
 			if(lista[i][0].type==3 && lista[i].size()>mayor){
@@ -246,13 +222,11 @@ public:
 		cout<<"En el nodo "<<indice<<" : "<< twittero<<endl;
 		cout<<"y publicó "<<mayor - 1<<" publicaciones."<<endl;
 	}
-
-	void users_que_publicaron_la_palabra(string palabra){
-			vector<node> users;
-			vector<node> tweets;
-			int i = 0;
+	//Funcion para encontrar los usuarios que publicaron cierta palabra
+	void users_que_publicaron_la_palabra(string palabra){ //O(n2)
+			vector<node> users; //Vector de los usuarios
+			int i = 0; //i será el indice de la palabra palabra
 			while(lista[i][0].data!=palabra){
-				// cout<<"i: "<<i<<endl;
 				if(i == V.size()-1){
 					cout<<"No se encontró la palabra :("<<endl;
 					return;
@@ -264,17 +238,18 @@ public:
 			//Aqui i es el index de palabra.
 			for(int j = 0;j<lista[i].size(); j++){
 				// cout<<lista[i][j].data<<" "<<endl; //Estos son los tweetsID que contienen a la palabra palabra
-				for(int k = 0; k<V.size(); k++){
-					if(lista[k][0].data == lista[i][j].data){
+				for(int k = 0; k<V.size(); k++){ //Ahora buscamos los indices de los TweetsID
+					if(lista[k][0].data == lista[i][j].data){ 
 						cout<<"k: " <<k<<endl; //En el indice k esta encontramos el tweetID
-						for(int m = 0; m<lista[k].size(); m++){
-							if(lista[k][m].type == 3)
-								users.push_back(lista[k][m]);
+						for(int m = 0; m<lista[k].size(); m++){ //Ahora, por todos los usuarios que publicaron dicho tweet
+							if(lista[k][m].type == 3) //Si son users
+								users.push_back(lista[k][m]); //los pusheamos al vector users
 						}
 					}
 				}
 
 			}
+			//Duda: ¿Era necesario verificar repeticiones de users? Debería ser un unordered_set?
 			// cout<<"Los usuarios que han encontrado algun tweet con esa palabra son"<< users.size()<<endl;
 			if(users.size()==0){
 				cout<< "Ningún usuario ha publicado algún tweet con esa palabra" << endl;
@@ -291,20 +266,17 @@ public:
 			
 	}
 
-
+	//Esta función  da las fechas en las que se encontraron tweets que contenian las palabras del vector palabras 
 	void fechas_palabra(vector<string> palabra){
-		// cout << "buscando palabra" << endl;
-		// vector<node> TwID;
-		// int l=0;
-		unordered_set<node, node::HashFunction> fechas;
-		int k=0;
+		unordered_set<node, node::HashFunction> fechas;  //unordered_set que tiene las fechas
+		int k=0; //
 		for(int i=0; i<size; i++){
 				// identificamos los tweets que contienen dichas palabras. luego, 
 				// lista[i] es un vector que contiene todos las palabras asociadas
 				// 
 			if(lista[i][0].type == 0){
 				for(int j=0; j<palabra.size(); j++){
-					if(findvectornode(palabra,lista[i])){
+					if(findvectornode(palabra,lista[i])){ 
 						k++;
 						// cout << palabra[j] << endl;
 					}
