@@ -10,7 +10,6 @@ using namespace std;
 
 
 int main(){
-
 	ifstream my_file;  
 	my_file.open("dataset-sin-stop-words.csv"); //Abrimos el archivo
 	char dl = ','; //Con el delimitador ;
@@ -18,18 +17,16 @@ int main(){
 	int cont = 0; //cont sera un contador de las lineas leídas
 	int tol = 5000; //tol es la cantidad de lineas que vamos a leer
 	tol--; //restamos uno pues empezamos de cero
-	int N=0;
-	int E=0;
-
 	getline(my_file, line);//Leeemos la primera fila (de etiquetas)
 	vector<string> linestring; //declaramos el vector de strings linestring
 	//Aqui definir los conjuntos
-	unordered_set<node, node::HashFunction> nodos1;
-	unordered_set<node, node::HashFunction> nodos2;
-	unordered_set<node, node::HashFunction> nodos3;
+	unordered_set<node, node::HashFunction> nodos1; //Unordered_set que almacenará los nodos tipo1, para evitar verificar que ingresemos repetidos
+	unordered_set<node, node::HashFunction> nodos2; //Analogo
+	unordered_set<node, node::HashFunction> nodos3; //Analogo
+	//No necesitamos uno para tipo 0 pues cada fila tiene TweetID distinto
 	
 
-	nodelist Lista;
+	nodelist Lista; //Creamos nuestro grafo con lista de adyacencia Lista
 
 	// Inicializamos el tiempo de construcción del grafo
 	auto start = chrono::steady_clock::now();
@@ -41,69 +38,45 @@ int main(){
 		linestring = splitStrings(line, dl); //Tokenizamos esa linea, y la guardamos como vector en linestring
 		// datarow data = linestring; //Así, podemos declarar el datarow data con los campos adecuados
 		
-		node nodo0, nodo1, nodo3; 
-		nodo0.data = linestring[0];
-		nodo0.type = 0;
-		// nodos0.insert(nodo0);
-		// if(cont == 2500){
-			// auto start6 = chrono::steady_clock::now();
-			Lista.addnode(nodo0);
-			// auto end6 = chrono::steady_clock::now();
-			// cout << "Tiempo de añadir un nodo: " << chrono::duration_cast<chrono::nanoseconds>(end6-start6).count() << " x10^-9 segundos"<< endl;
-		// }
-
-
-		N++;
-
+		node nodo0, nodo1, nodo3;  //Declaramos los 3 tipos de nodo
+		nodo0.data = linestring[0]; //El nodo 0 (nodo de tipo 0) es el primer elemento del vector linestring (TweetID)
+		nodo0.type = 0; //Asignamos el tipo 0
+		Lista.addnode(nodo0); //y lo añadimos a la lista
+	
 		nodo1.data = linestring[1];
 		nodo1.type = 1;
 
 		nodo3.data = linestring[3];
 		nodo3.type = 3;
-
+		//Si no se ha ingresado el nodo1, lo insertamos al unordered_set y a la lista
 		if(!nodos1.count(nodo1)){
 			nodos1.insert(nodo1);
 		// 	//Sabemos que el nodo no estaba ingresado. Entonces, lo insertamos a la lista de adyacencia
 			Lista.addnode(nodo1);
-			N++;
-			// Lista.addedge(nodo0, nodo1);
 		}
-
-		// if(cont==2500){
-			// auto start7 = chrono::steady_clock::now();
-			Lista.addedge(nodo0, nodo1);
-			// auto end7 = chrono::steady_clock::now();
-			// cout << "Tiempo de añadir una arista: " << chrono::duration_cast<chrono::nanoseconds>(end7-start7).count() << " x10^-9 segundos"<< endl;
-		// }
-
-		
-		E++;
-
+		//Añadimos la arista respectiva entre el nodo de tipo 0 (TweetID) y el nodo de tipo 1 (TweetDate)
+		Lista.addedge(nodo0, nodo1);
+		//Analogo para nodo tipo 3
 		if(!nodos3.count(nodo3)){
 			nodos3.insert(nodo3);
 			Lista.addnode(nodo3);
-			N++;
-		// 	Lista.addedge(nodo0,nodo3);
 		}
 		Lista.addedge(nodo0,nodo3);
-		E++;
 	
 		//Las lineas anteriores ingresan todo menos las palabras del tweettext.
-
+		//Para las palabras del tweet, las separamos segun el espacio
 		vector<string> palabras_tweet = splitStrings(linestring[2],' '); //Separar tweettetxt en vector de palabras
 		//Problema estamos ingresando repetidas
-
-		for(int i = 0; i<palabras_tweet.size(); i++){ //Por cada palabra en el tweet text (para cada palabra no ingresadad debería ser)
-			node nodoaux;
-			nodoaux.data = palabras_tweet[i];
-			nodoaux.type = 2;
+		
+		for(int i = 0; i<palabras_tweet.size(); i++){ //Por cada palabra en el tweet text 
+			node nodoaux; //Creamos un nodo auxiliar
+			nodoaux.data = palabras_tweet[i]; //A ese nodo le asignamos como dato el valor de la palabra i
+			nodoaux.type = 2; //y tipo 2
 			if(!nodos2.count(nodoaux)){ //Si no esta el nodo en el conjunto, lo ingresamos
 				nodos2.insert(nodoaux);
-				N++;
 				Lista.addnode(nodoaux);
 			}
-			Lista.addedge(nodo0,nodoaux);
-			E++;
+			Lista.addedge(nodo0,nodoaux); //Añadimos la arista entre el nodo tipo 0 y el nodo palabra
 		}
 
 
@@ -111,16 +84,14 @@ int main(){
 
 	}
 
+	
 	// LINEA COMENTADA QUE SIRVE PARA DESPLEGAR LOS NODOS DEL GRAFO
 
-	// int N = nodos0.size()+nodos1.size()+nodos2.size()+nodos3.size();
 	cout << endl;
 	cout<<"INFORMACIÓN DEL GRAFO:"<<endl;
-	cout<< "Nuestro grafo tiene " << N << " nodos y "<< E << " aristas" <<endl;
+	cout<< "Nuestro grafo tiene " << Lista.size << " nodos y "<< Lista.num_edges << " aristas" <<endl;
 	Lista.get_num();
-	// for(const auto& elem: nodos2){
-		// cout<<elem.data<<endl;
-	// }
+
 	// Lista.print();
 
 	auto end = chrono::steady_clock::now();
